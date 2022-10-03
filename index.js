@@ -3,7 +3,8 @@ const app = express();
 const http = require('http').Server(app);
 const cors = require('cors');
 const { tasks } = require('./tasks');
-const { fetchID } = require('./fetchId')
+const { fetchID } = require('./fetchId');
+const { TASK_DRAGGED, ADD_COMMENT, CREATE_TASK, FETCH_COMMENTS, TASKS, COMMENTS } = require('./CONSTANTS');
 
 require('dotenv').config();
 
@@ -21,13 +22,13 @@ app.use(express.json());
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
-    socket.on('createTask', (data) => {
+    socket.on(CREATE_TASK, (data) => {
         const newTAsk = { id: fetchID(), title: data.task, comments: [] }
         tasks['pending'].items.push(newTAsk)
-        socket.emit('tasks', tasks)
+        socket.emit(TASKS, tasks)
     });
 
-    socket.on('addComment', (data) => {
+    socket.on(ADD_COMMENT, (data) => {
         const { category, userId, comment, id } = data;
         const taskItems = tasks[category].items;
         taskItems.forEach((task) => {
@@ -37,22 +38,22 @@ socketIO.on('connection', (socket) => {
                     text: comment,
                     id: fetchID(),
                 });
-                socket.emit('comments', task.comments)
+                socket.emit(COMMENTS, task.comments)
             }
         })
     })
 
-    socket.on('taskDragged', (data) => {
+    socket.on(TASK_DRAGGED, (data) => {
         const { source, destination } = data;
         const itemMoved = {
             ...tasks[source.droppableId].items[source.index],
         };
         tasks[source.droppableId].items.splice(source.index, 1);
         tasks[destination.droppableId].items.splice(destination.index, 0, itemMoved);
-        socket.emit("tasks", tasks);
+        socket.emit(TASKS, tasks);
     });
 
-    socket.on('fetchComments', (data) => {
+    socket.on(FETCH_COMMENTS, (data) => {
         const { category, id } = data;
         const taskItems = tasks[category].items;
         taskItems.forEach((task) => {
