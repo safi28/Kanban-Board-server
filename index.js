@@ -18,6 +18,15 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const db = require("./models/index");
+db.sequelize.sync({ force: false }) // force: false to not drop table if exists
+    .then(() => {
+        console.log("Synced db.");
+    })
+    .catch((err) => {
+        console.log("Failed to sync db: " + err.message);
+    });
+
 
 socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
@@ -72,6 +81,8 @@ socketIO.on('connection', (socket) => {
 app.get("/api", (req, res) => {
     res.json(tasks);
 });
+
+require("./routes/task.routes.js")(app);
 
 http.listen(process.env.PORT, () => {
     console.log(`Server listening on ${process.env.PORT}`);
