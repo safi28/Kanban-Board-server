@@ -32,8 +32,8 @@ socketIO.on('connection', (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
     socket.on(CREATE_TASK, (data) => {
-        const newTAsk = { id: fetchID(), title: data.task, comments: [] }
-        tasks['pending'].items.push(newTAsk)
+        const newTask = { id: fetchID(), title: data.task, comments: [] }
+        tasks['pending'].items.push(newTask)
         socket.emit(TASKS, tasks)
     });
 

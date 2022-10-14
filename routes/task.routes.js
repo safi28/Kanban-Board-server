@@ -6,6 +6,12 @@ module.exports = app => {
     // Create a new Task
     router.post("/", tasks.create);
 
+    /// Add comment
+    router.post("/comment", tasks.addComment);
+
+    /// Get comments
+    router.get('/comments', tasks.findComments)
+
     // Retrieve all Tasks
     router.get("/", tasks.findAll);
 

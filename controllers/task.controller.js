@@ -1,10 +1,10 @@
+const { fetchID } = require("../fetchId");
 const db = require("../models");
 const Task = db.tasks;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Task
 exports.create = (req, res) => {
-    console.log(req.body);
     if (!req.body.title) {
         res.status(400).send({
             message: "Content can not be empty!"
@@ -13,7 +13,7 @@ exports.create = (req, res) => {
     }
 
     const task = {
-        id: req.body.id,
+        id: fetchID(),
         category: req.body.category,
         title: req.body.title,
         comments: req.body.comments,
@@ -30,6 +30,34 @@ exports.create = (req, res) => {
             });
         });
 };
+
+exports.addComment = (req, res) => {
+    const { userId, comment, id } = req.body;
+    Task.findByPk(id)
+        .then(data => {
+            if (data) {
+                data.update({
+                    comments: {
+                        name: userId,
+                        text: comment,
+                        id: fetchID(),
+                    }
+                }).then((result) => {
+                    res.send(result);
+                });
+            } else {
+                res.status(404).send({
+                    message: `Cannot find Task with id=${id}.`
+                });
+            }
+        })
+}
+
+exports.findComments = (req, res) => {
+    Task.findAll({ attributes: ['comments'] }).then((data) => {
+        res.send(data)
+    })
+}
 
 exports.findAll = (req, res) => {
     const title = req.query.title;
